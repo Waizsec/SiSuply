@@ -20,10 +20,6 @@ env/
 .vscode/
 .idea/
 
-# Database files
-*.sqlite3
-*.db
-
 # Logs
 *.log
 *.out
@@ -50,3 +46,19 @@ coverage.xml
 instance/
 .mypy_cache/
 celerybeat-schedule
+
+# Node.js / React-specific ignores
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/build
+/dist
+*.lock
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.vscode/
+coverage/
