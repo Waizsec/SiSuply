@@ -1,0 +1,52 @@
+# Python-specific ignores
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+*.env
+
+# Virtual environments
+venv/
+ENV/
+.venv/
+env/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Database files
+*.sqlite3
+*.db
+
+# Logs
+*.log
+*.out
+*.pid
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Flask specific
+instance/
+.mypy_cache/
+celerybeat-schedule
