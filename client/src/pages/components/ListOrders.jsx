@@ -4,13 +4,13 @@ const ListOrders = () => {
     return (
         <div className="mt-[5vw]">
             <div className="flex justify-between items-center pr-[3vw]">
-                <h2 className='text-[2vw] font-medium ml-[0.5vw]'>Porduct Line Up</h2>
+                <h2 className='text-[2vw] font-medium ml-[0.5vw]'>Order List</h2>
                 <input type="search" name="searchProduct" placeholder='Search...' className='h-[3vw] pl-[1vw] rounded-[1vw] text-[1vw] outline-none' id="" />
             </div>
             <p className='flex items-center'>
                 <div className="h-[0.1vw] mt-[1vw] w-[20vw] bg-black"></div>
             </p>
-            <div className="overflow-scroll h-[30vw] mt-[3vw] pr-[5vw]">
+            <div className="overflow-scroll h-[35vw] mt-[3vw] pr-[5vw]">
                 <div className="flex flex-col h-[auto]">
                     {/* Product Line Up */}
                     {[1, 2, 3, 4, 5, 6, 0, 1, 1, 1, 1, 1, 1, 1, 1].map(product => (

@@ -24,7 +24,7 @@ const Dashboard = () => {
 
 
 
-            <div className="w-[55vw] pl-[5vw] py-[10vw] h-[100vh] overflow-y-scroll">
+            <div className="w-[55vw] pl-[5vw] pb-[7vw] pt-[10vw] h-[100vh] overflow-y-scroll">
                 <ListProducts />
                 <ListOrders />
             </div>
