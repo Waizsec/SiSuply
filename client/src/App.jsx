@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       {/* Login Pages */}
-      <Login />
+      {/* <Login /> */}
 
       {/* Dashboard */}
       <Dashboard />
