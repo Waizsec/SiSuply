@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
+import requests
 from firebase_admin import credentials, firestore
 import firebase_admin as fa
 import uuid
 app = Flask(__name__)
 
 # Import Credentials Firebase
-file_cred = credentials.Certificate("configfirebase.json")
+file_cred = credentials.Certificate("cfg/configfirebase.json")
 fa.initialize_app(file_cred)
 
 db = firestore.client()
@@ -23,7 +24,7 @@ def get_suppliers():
     try:
         # Akses koleksi db_produk
         suppliers = {
-            "id": "SUP003",
+            "id": "SUP03",
             "nama_sup": "Supplier 03",
             "kota": "Surakarta",
             "tipe": "Sparepart"
@@ -31,6 +32,118 @@ def get_suppliers():
         return jsonify(suppliers), 200  # Mengembalikan semua produk dalam format JSON
     except Exception as e:
         return jsonify("FALSE"), 400
+
+# POST -> Cek Harga dari Distributor
+@app.route('/api/cek_harga', methods=['POST'])
+def cek_harga():
+    data = request.json
+
+    try:
+        collTransaksi = db.collection('tbl_transaksi')
+        data_transaksi = collTransaksi.stream()
+        indexing = sum(1 for _ in data_transaksi) + 1  # Hitung berapa kali cek harga dilakukan sebelumnya
+
+        # Generate id_log dengan format "SUP01RET03DIS01"
+        id_log = f"SUP03RET03DIS01-{indexing:0d}"  # 000 di bagian akhir menandakan cek harga ke berapa
+        # id_log tergantung dari RETAIL DAN DISTRIBUTOR BERAPA
+        
+        inputTransaksi = {
+            "id_log": id_log,
+            "id_retail": data["id_retail"],
+            "id_distributor": data['id_distributor'],
+            "kota_tujuan": data['kota_tujuan'],
+            "total_berat_barang": data['total_berat_barang'],
+            "total_harga_barang": data['total_harga_barang'],
+        }
+
+        collTransaksi.document(id_log).set(inputTransaksi)
+
+        collInvoice = db.collection('tbl_invoice')
+        for item in data['cart']:
+            order_data = {
+                "id_log": id_log,  # Menggunakan id_log yang sama
+                "id_produk": item['id_produk'],
+                "quantity": item['quantity']
+            }
+            collInvoice.add(order_data)
+
+        # Cek ongkir dari distributor
+        
+        # Ini IP dari distributor ASFA -> bikin IF else
+        respOngkir = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
+            "id_log": id_log,  # Menggunakan id_log yang baru di-generate
+            "kota_asal": "Surakarta",
+            "kota_tujuan": data['kota_tujuan'],
+            "quantity": sum(item['quantity'] for item in data['cart']),  # Total quantity dari semua produk
+            "berat": data['total_berat_barang']
+        })
+        
+        dataOngkir = respOngkir.json()
+
+        # Update data transaksi dengan harga pengiriman dan lama pengiriman
+        inputTransaksi.update({
+            "harga_pengiriman": dataOngkir['harga_pengiriman'],  # Mengambil harga_pengiriman dari respons
+            "lama_pengiriman": dataOngkir.get('lama_pengiriman')  # Mengambil lama_pengiriman jika ada
+        })
+
+        # Simpan transaksi ke tbl_transaksi dengan id_log yang dihasilkan
+        collTransaksi.document(id_log).set(inputTransaksi)
+
+        if respOngkir.status_code != 200:
+            return jsonify({"error": "Gagal mendapatkan ongkir dari distributor"}), 400
+
+        return jsonify({
+            "pesan": "Cek harga berhasil",
+            "transaction_id": id_log,  # Menggunakan id_log yang baru di-generate
+            "harga_pengiriman": dataOngkir['harga_pengiriman'],
+            "lama_pengiriman": dataOngkir.get('lama_pengiriman')
+        }), 200
+
+    except Exception as e:
+        return jsonify("FALSE"), 500
+
+@app.route('/api/checkout', methods=['POST'])
+def checkout():
+    data = request.json
+    try:
+        collTransaksi = db.collection('tbl_transaksi').document(data['id_log'])
+        data_transaksi = collTransaksi.get()
+
+        if not data_transaksi.exists:
+            return jsonify({"error": "NOT FOUND"}), 404
+
+        transaction_data = data_transaksi.to_dict()
+
+        # Melakukan pemesanan ke distributor
+        checkOutResp = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/fix_kirim", json={
+            "id_log": data['id_log']
+        })
+        data_checkout = checkOutResp.json()
+
+        # Membuat objek Pembelian baru
+        fixCheckout = {
+            "id_log": collTransaksi,  # Menggunakan referensi ke dokumen
+            "total_harga_barang": transaction_data['total_harga_barang'],
+            "total_berat_barang": transaction_data['total_berat_barang'],
+            "no_resi": data_checkout['no_resi'],  # Mengambil no_resi dari respons
+            "harga_pengiriman": data_checkout['harga_pengiriman'],
+            "lama_pengiriman": data_checkout.get('lama_pengiriman'),  # Mengambil harga_pengiriman dari respons
+            "tanggal_pembelian": firestore.SERVER_TIMESTAMP  # Menggunakan timestamp server
+        }
+
+        # Simpan pembelian baru ke Firestore
+        db.collection('tbl_checkout').add(fixCheckout)
+
+        return jsonify({
+            "message": "Pemesanan berhasil dilakukan",
+            "purchase_id": collTransaksi.id,  # Menggunakan id dari referensi
+            "no_resi": data_checkout['no_resi'],
+            "harga_pengiriman": data_checkout['harga_pengiriman'],
+            "lama_pengiriman": data_checkout.get('lama_pengiriman') 
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 #  _______  ______    __   __  ______  
 # |       ||    _ |  |  | |  ||      | 
@@ -40,10 +153,13 @@ def get_suppliers():
 # |     |_ |   |  | ||       ||       |
 # |_______||___|  |_||_______||______| 
 
-
 # Create
 @app.route('/api/products', methods=['POST'])
 def add_product():
+    collProduct = db.collection('tbl_produk')
+    data_product = collProduct.stream()
+    indexing = sum(1 for _ in data_product) + 1
+    id_log = f"{indexing:0d}"
     try:
         # Nilai default yang ditetapkan untuk produk baru
         product_data = {
@@ -52,13 +168,12 @@ def add_product():
             "harga" : int(request.form.get('harga', 0)),
             "jml_stok" : int(request.form.get('jml_stok', 0)),
             "nama_produk" : request.form.get('nama_produk', '-'),
-            "id_produk" : uuid.uuid4()
+            "id_produk" : id_log
             }
         
-        # Menambahkan data produk ke dalam koleksi 'tbl_produk'
-        new_doc_ref = db.collection('tbl_produk').document()  # Membuat dokumen baru
-        product_data['id_produk'] = new_doc_ref.id  # Set id_produk to the new document ID
-        new_doc_ref.set(product_data)  # Menyimpan data produk
+        new_doc_ref = db.collection('tbl_produk').document()
+        product_data['id_produk'] = new_doc_ref.id  
+        new_doc_ref.set(product_data)
         
         return jsonify("TRUE"), 201
     except Exception as e:
