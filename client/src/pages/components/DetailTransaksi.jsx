@@ -1,9 +1,14 @@
 import React from 'react'
 
 const DetailTransaksi = () => {
+
     return (
-        <div className='w-[45vw] flex flex-col relative mt-[9vw] h-[40vw] py-6 px-[4vw] ml-[4vw] rounded-lg bg-white'>
-            <h1 className='text-[2vw] font-medium w-full text-center mb-[2vw]'>Invoice Transaksi</h1>
+        <div className='w-full flex flex-col relative mt-[10vw] h-[40vw] py-6 px-[4vw] rounded-lg bg-white'>
+            <div className="flex justify-between text-[1vw] mb-[2vw] items-center">
+                <h1 className='text-[2vw] font-medium text-center'>Invoice Transaksi</h1>
+                <h1 className='text-[1.2vw] font-medium text-center'>#ID71234HASF21</h1>
+            </div>
+
             <div className="flex justify-between text-[1vw]">
                 <p>Tanggal: </p>
                 <p>12/12/2012</p>

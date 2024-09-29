@@ -2,41 +2,41 @@ import React from 'react'
 
 const ProductsForm = () => {
     return (
-        <div className='w-[45vw] flex flex-col relative mt-[10vw] h-[40vw] p-6 ml-[4vw] rounded-lg'>
+        <div className='w-full flex flex-col relative mt-[10vw] h-[42vw] p-6 rounded-lg'>
             <h1 className='text-[2vw] font-medium mb-6'>Update Products</h1>
 
             <input
                 type="text"
                 name="productname"
                 placeholder='Product Name...'
-                className='w-full mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
+                className='w-full text-[1vw] mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
             />
 
             <input
                 type="text"
                 name="imgurl"
                 placeholder='Image Link...'
-                className='w-full mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
+                className='w-full text-[1vw] mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
             />
 
             <input
                 type="number"
                 name="stock"
                 placeholder='Stock'
-                className='w-full mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
+                className='w-full text-[1vw] mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
             />
 
             <input
                 type="number"
                 name="price"
                 placeholder='Price'
-                className='w-full mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
+                className='w-full text-[1vw] mb-4 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black'
             />
 
             <textarea
                 name="description"
                 placeholder="Product Descriptions..."
-                className='w-full mb-6 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-black'
+                className='w-full h-[19vw] mb-6 p-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-black'
             ></textarea>
 
             <div className="flex justify-end">
@@ -47,7 +47,6 @@ const ProductsForm = () => {
                     Update
                 </button>
             </div>
-
         </div>
 
     )

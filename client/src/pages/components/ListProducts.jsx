@@ -1,10 +1,15 @@
 import React from 'react'
 
-const ListProducts = () => {
+const ListProducts = ({ setLeftDisplay }) => {
     return (
-        <div className="">
+        <div className="bg-[#F5F5F5] z-[10]">
             <div className="flex justify-between items-center pr-[3vw]">
-                <h2 className='text-[2vw] font-medium ml-[0.5vw] relative'>Porduct Line Up <span className="w-[1.8vw] h-[1.8vw] text-[1.3vw] rounded-full bg-black text-white absolute flex items-center justify-center top-[-0.2vw] cursor-pointer right-[-2.3vw]">+</span></h2>
+                <h2 className='text-[2vw] font-medium ml-[0.5vw] relative'>Porduct Line Up
+                    <span className="w-[1.8vw] h-[1.8vw] text-[1.3vw] rounded-full bg-black text-white absolute flex items-center justify-center border-[0.2vw] border-black top-[-0.2vw] cursor-pointer right-[-2.3vw] hover:bg-white hover:text-black duration-700">
+                        <span className='mt-[-0.2vw]'>+</span>
+                    </span>
+
+                </h2>
                 <input type="search" name="searchProduct" placeholder='Search...' className='h-[3vw] pl-[1vw] rounded-[1vw] text-[1vw] outline-none' id="" />
             </div>
             <p className='flex items-center'>
@@ -31,7 +36,9 @@ const ListProducts = () => {
                                     </p>
                                 </div>
                             </div>
-                            <button className='absolute right-[-1vw] top-[-1vw] bg-black text-white w-[5vw] h-[2vw] rounded-[0.4vw]'>
+                            <button className='absolute right-[-1vw] top-[-1vw] bg-black text-white w-[5vw] h-[2vw] rounded-[0.4vw] hover:bg-white hover:text-black duration-700 border-[0.2vw] border-black'
+                                onClick={() => setLeftDisplay(1)}
+                            >
                                 Edit</button>
                         </div>
                     ))}

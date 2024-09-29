@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ListOrders = () => {
+const ListOrders = ({ setLeftDisplay }) => {
     return (
         <div className="mt-[5vw]">
             <div className="flex justify-between items-center pr-[3vw]">
@@ -21,7 +21,9 @@ const ListOrders = () => {
                                 <p className='w-[25%]'>Pembeli</p>
                                 <p className='w-[25%]'>Total Harga</p>
                             </div>
-                            <div className="h-[85%] w-[20%] ml-[5%] bg-black rounded-md text-white flex items-center justify-center text-[0.9vw]">
+                            <div className="h-[85%] w-[20%] ml-[5%] bg-black rounded-md text-white flex items-center justify-center text-[0.9vw] hover:bg-white hover:text-black duration-700 border-[0.2vw] border-black cursor-pointer"
+                                onClick={() => setLeftDisplay(2)}
+                            >
                                 See Detail
                             </div>
                         </div>
