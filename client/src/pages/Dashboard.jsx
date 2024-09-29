@@ -4,6 +4,8 @@ import { DetailTransaksi, ListOrders, ListProducts, ProductsForm } from './compo
 
 const Dashboard = () => {
     const [LeftDisplay, setLeftDisplay] = useState(0);
+    const [SelectedProducts, setSelectedProduct] = useState(null);
+    const [selectedTrx, setSelectedTrx] = useState(null);
     const scrollRef = useRef(null);
 
     // Scroll to the appropriate section based on LeftDisplay state
@@ -16,11 +18,25 @@ const Dashboard = () => {
         }
     }, [LeftDisplay]);
 
+    useEffect(() => {
+        if (SelectedProducts) {
+            setLeftDisplay(1); // Set LeftDisplay to 1 when SelectedProducts changes
+        }
+    }, [SelectedProducts]);
+
+    useEffect(() => {
+        if (LeftDisplay == 2) {
+            setSelectedProduct(null); // Set LeftDisplay to 1 when SelectedProducts changes
+        }
+    }, [LeftDisplay]);
+
+    console.log(SelectedProducts)
+
     return (
 
         <div className="flex h-[100vh] relative">
             {/* Left Side */}
-            <div ref={scrollRef} className="h-[100vh] overflow-y-hidden pb-[6vw] w-[45vw] pl-[7vw]">
+            <div ref={scrollRef} className="h-[100vh] overflow-y-hidden pb-[8vw] w-[45vw] pl-[7vw]">
                 {/* Condition 1 */}
                 <div className="w-full h-[82vh] flex flex-col relative mt-[10vw]">
                     <TypeAnimation
@@ -36,15 +52,15 @@ const Dashboard = () => {
                         ASFA, the voice of superannuation since 1962, is the peak policy, research and advocacy body for Australia's superannuation industry.
                     </p>
                 </div>
-                <ProductsForm />
+                <ProductsForm products={SelectedProducts} />
                 <DetailTransaksi />
             </div>
 
 
             {/* Right Side */}
             <div className="w-[55vw] pl-[5vw] pb-[7vw] pt-[10vw] h-[100vh] overflow-y-scroll">
-                <ListProducts setLeftDisplay={setLeftDisplay} />
-                <ListOrders setLeftDisplay={setLeftDisplay} />
+                <ListProducts setLeftDisplay={setLeftDisplay} setSelectedProduct={setSelectedProduct} />
+                <ListOrders setLeftDisplay={setLeftDisplay} setSelectedTrx={setSelectedTrx} />
             </div>
 
         </div>

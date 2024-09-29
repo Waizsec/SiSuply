@@ -8,13 +8,13 @@ const ListOrders = ({ setLeftDisplay }) => {
                 <input type="search" name="searchProduct" placeholder='Search...' className='h-[3vw] pl-[1vw] rounded-[1vw] text-[1vw] outline-none' id="" />
             </div>
             <p className='flex items-center'>
-                <div className="h-[0.1vw] mt-[1vw] w-[20vw] bg-black"></div>
+                <span className="h-[0.1vw] mt-[1vw] w-[20vw] bg-black"></span>
             </p>
             <div className="overflow-scroll h-[35vw] mt-[3vw] pr-[5vw]">
                 <div className="flex flex-col h-[auto]">
                     {/* Product Line Up */}
-                    {[1, 2, 3, 4, 5, 6, 0, 1, 1, 1, 1, 1, 1, 1, 1].map(product => (
-                        <div className="h-[3vw] mb-[1vw] flex items-center justify-center">
+                    {[1, 2, 3, 4, 5, 6, 0, 8].map(product => (
+                        <div key={product} className="h-[3vw] mb-[1vw] flex items-center justify-center">
                             <div className='flex h-full bg-white items-center px-[3vw] text-[0.9vw] w-[75%] rounded-md'>
                                 <p className='w-[25%]'>Resi</p>
                                 <p className='w-[25%]'>Jumlah Item</p>

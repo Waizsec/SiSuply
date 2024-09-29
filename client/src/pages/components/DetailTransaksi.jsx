@@ -26,7 +26,7 @@ const DetailTransaksi = () => {
             </div>
 
             {[1, 2, 3, 4, 5, 6].map(product => (
-                <div className="flex justify-between text-[1vw]  border-b-[0.1vw] py-[0.5vw] border-black">
+                <div key={product} className="flex justify-between text-[1vw]  border-b-[0.1vw] py-[0.5vw] border-black">
                     <p className='w-[25%] text-start'>Pedal G413</p>
                     <p className='w-[25%] text-end'>20</p>
                     <p className='w-[25%] text-end'>120000</p>
