@@ -53,7 +53,7 @@ const Dashboard = () => {
                     </p>
                 </div>
                 <ProductsForm products={SelectedProducts} />
-                <DetailTransaksi />
+                <DetailTransaksi orders={selectedTrx} />
             </div>
 
 
