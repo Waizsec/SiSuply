@@ -45,7 +45,7 @@ def cek_harga():
         collTransaksi = db.collection('tbl_transaksi')
         data_transaksi = collTransaksi.stream()
         indexing = sum(1 for _ in data_transaksi) + 1  # Hitung berapa kali cek harga dilakukan sebelumnya
-
+        
         # Generate id_log dengan format "SUP01RET03DIS01"
         id_log = f"SUP03-{indexing:0d}"  # 000 di bagian akhir menandakan cek harga ke berapa
         # id_log tergantung dari RETAIL DAN DISTRIBUTOR BERAPA
@@ -150,6 +150,40 @@ def checkout():
             })
         data_checkout = checkOutResp.json()
 
+        collInvoice = db.collection('tbl_invoice').where('id_log', '==', data['id_log']).get()
+        if not collInvoice or len(collInvoice) == 0:
+            return jsonify({"error": "Transaksi not found"}), 404
+        
+        stocks_deducted = []
+        for order in collInvoice:
+        # Ambil ID produk dan jumlah
+            order_dict = order.to_dict()
+            id_produk = str(order_dict.get('id_produk'))
+            quantity = order_dict.get('quantity', 0)
+
+            # Ambil data produk
+            collProduk = db.collection('tbl_produk').document(id_produk)
+            dataProduk = collProduk.get()
+
+            if dataProduk.exists:
+                stock_sekarang = dataProduk.to_dict().get('jml_stok', 0)
+                new_stock = stock_sekarang - quantity
+
+                if new_stock < 0:
+                    return jsonify({"error": f"Stok untuk produk {id_produk} tidak mencukupi"}), 400
+
+                # Update stok
+                collProduk.update({
+                    "jml_stok": new_stock
+                })
+                
+                stocks_deducted.append({
+                            "id_produk": id_produk,
+                            "new_stock": new_stock
+                        })
+            else:
+                return jsonify({"error": f"Produk {id_produk} not found"}), 404
+        
         # Membuat objek Pembelian baru
         fixCheckout = {
             "id_log": collTransaksi,  # Menggunakan referensi ke dokumen
@@ -169,7 +203,7 @@ def checkout():
             "purchase_id": collTransaksi.id,  # Menggunakan id dari referensi
             "no_resi": data_checkout['no_resi'],
             "harga_pengiriman": data_checkout['harga_pengiriman'],
-            "lama_pengiriman": data_checkout.get('lama_pengiriman') 
+            "lama_pengiriman": data_checkout.get('lama_pengiriman'),
         }), 200
 
     except Exception as e:
@@ -193,7 +227,7 @@ def add_product():
         
         # Hitung jumlah produk untuk menentukan ID berikutnya
         indexing = sum(1 for _ in data_product) + 1
-        id_log = f"{indexing:0d}"  # Mengatur format id_log dengan leading zero (misal 0001, 0002, dst.)
+        id_log = f"P03-{indexing:0d}"  # Mengatur format id_log dengan leading zero (misal 0001, 0002, dst.)
         
         # Nilai default yang ditetapkan untuk produk baru
         product_data = {
@@ -247,16 +281,14 @@ def update_product(product_id):
         # Mengambil data produk yang ada dari Firestore
         current_data = doc.to_dict()
 
-        # Mengambil data PUT dari request JSON
-        data = request.json
-        
+        # Mengambil data dari form request
         product_data = {
-            "berat": float(data.get('berat', current_data.get('berat', 0))),
-            "deskripsi": data.get('deskripsi', current_data.get('deskripsi', '-')),
-            "harga": int(data.get('harga', current_data.get('harga', 0))),
-            "jml_stok": int(data.get('jml_stok', current_data.get('jml_stok', 0))),
-            "nama_produk": data.get('nama_produk', current_data.get('nama_produk', '-')),
-            "link_gambar": data.get('link_gambar', current_data.get('link_gambar', '-'))
+            "berat": float(request.form.get('berat', current_data.get('berat', 0))),
+            "deskripsi": request.form.get('deskripsi', current_data.get('deskripsi', '-')),
+            "harga": int(request.form.get('harga', current_data.get('harga', 0))),
+            "jml_stok": int(request.form.get('jml_stok', current_data.get('jml_stok', 0))),
+            "nama_produk": request.form.get('nama_produk', current_data.get('nama_produk', '-')),
+            "link_gambar": request.form.get('link_gambar', current_data.get('link_gambar', '-'))
         }
 
         # Memperbarui dokumen dengan data baru
@@ -282,99 +314,67 @@ def delete_product(product_id):
     except Exception as e:
         return jsonify("FALSE"), 400
 
-# Update Stock
-@app.route('/api/update_stock', methods=['POST'])
-def update_stock():
-    data = request.json
-        
+# Tabel Transaksi
+@app.route('/api/get_transaksi', methods=['GET'])
+def get_transaksi():
     try:
-        # Validasi nomor resi
-        resi = data.get('no_resi')
-        if not resi:
-            return jsonify({"error": "Nomor resi harus diisi"}), 400
-
-        # Ambil transaksi berdasarkan id_log
-        collInvoice = db.collection('tbl_invoice').where('id_log', '==', data['id_log']).get()
-
-        # Cek apakah transaksi ditemukan
-        if not collInvoice or len(collInvoice) == 0:
-            return jsonify({"error": "Transaksi not found"}), 404
-
-        # Ambil data dari tbl_transaksi berdasarkan id_log
-        transaksi_doc = db.collection('tbl_transaksi').document(data['id_log']).get()
-
-        # Cek apakah dokumen transaksi ada
-        if not transaksi_doc.exists:
-            return jsonify({"error": "Transaksi tidak ditemukan pada tbl_transaksi"}), 404
-
-        # Ambil id_distributor dari dokumen transaksi
-        id_distributor = transaksi_doc.to_dict().get('id_distributor')
-
-        # Tentukan URL berdasarkan id_distributor
-        if id_distributor == "DIS03":
-            url = f"http://159.223.41.243:8000/api/status/{resi}"
-        elif id_distributor == "DIS02":
-            url = f"ISI URL DIS02{resi}"
-        elif id_distributor == "DIS01":
-            url = f"ISI URL DIS01{resi}"
-        else:
-            return jsonify({"error": "Distributor not recognized"}), 400
-
-        # Cek status pengiriman menggunakan URL yang sesuai
-        respStatus = requests.get(url)
+        # Ambil seluruh data dari tbl_transaksi
+        transaksi_data = db.collection('tbl_transaksi').stream()
+        transaksi_list = [doc.to_dict() for doc in transaksi_data]
         
-        # Cek jika request berhasil
-        if respStatus.status_code != 200:
-            return jsonify({"error": "Gagal mengambil status pengiriman"}), 400
-        
-        dataStatus = respStatus.json()
+        result = []
 
-        if dataStatus.get('status') != "On Progress":
-            stocks_deducted = []
+        # Iterasi setiap transaksi berdasarkan id_log
+        for transaksi in transaksi_list:
+            id_log = transaksi.get('id_log')
+            
+            # Ambil seluruh data dari tbl_invoice berdasarkan id_log
+            invoice_data = db.collection('tbl_invoice').where('id_log', '==', id_log).stream()
+            invoice_list = [doc.to_dict() for doc in invoice_data]
 
-            # Kurangi stok untuk setiap transaksi
-            for order in collInvoice:
-                # Ambil ID produk dan jumlah
-                order_dict = order.to_dict()
-                id_produk = str(order_dict.get('id_produk'))
-                quantity = order_dict.get('quantity', 0)
+            # Jika tidak ada invoice untuk transaksi ini, lanjut ke transaksi berikutnya
+            if not invoice_list:
+                continue
+            
+            # Data yang akan kita simpan untuk transaksi ini
+            transaksi_result = {
+                "id_log": id_log,
+                "produk": [],
+                "subtotal": transaksi.get('total_harga_barang', 0)
+            }
+            
+            # Iterasi setiap invoice dan ambil data produk dari tbl_produk
+            for invoice in invoice_list:
+                id_produk = invoice.get('id_produk')
+                quantity = invoice.get('quantity', 0)
 
-                # Ambil data produk
-                collProduk = db.collection('tbl_produk').document(id_produk)
-                dataProduk = collProduk.get()
+                # Ambil data produk dari tbl_produk
+                produk_ref = db.collection('tbl_produk').document(str(id_produk))
+                produk_data = produk_ref.get()
 
-                if dataProduk.exists:
-                    stock_sekarang = dataProduk.to_dict().get('jml_stok', 0)
-                    new_stock = stock_sekarang - quantity
+                if produk_data.exists:
+                    produk_info = produk_data.to_dict()
+                    harga = produk_info.get('harga', 0)
+                    nama_produk = produk_info.get('nama_produk', '-')
 
-                    if new_stock < 0:
-                        return jsonify({"error": f"Stok untuk produk {id_produk} tidak mencukupi"}), 400
+                    # Hitung total harga untuk produk ini
+                    total = harga * quantity
 
-                    # Update stok
-                    collProduk.update({
-                        "jml_stok": new_stock
-                    })
-
-                    # Tambahkan ke daftar produk yang stoknya dikurangi
-                    stocks_deducted.append({
+                    # Tambahkan detail produk ke transaksi_result
+                    transaksi_result['produk'].append({
                         "id_produk": id_produk,
-                        "new_stock": new_stock
+                        "nama_produk": nama_produk,
+                        "quantity": quantity,
+                        "harga": harga,
+                        "total": total
                     })
-                else:
-                    return jsonify({"error": f"Produk {id_produk} not found"}), 404
 
-            return jsonify({
-                "message": "Stock updated",
-                "stocks_deducted": stocks_deducted
-            }), 200
-        else:
-            return jsonify({"error": "Status hasn't changed"}), 400
+            # Tambahkan transaksi_result ke hasil akhir
+            result.append(transaksi_result)
 
-    except requests.exceptions.RequestException as e:
-        # Jika ada error pada request API eksternal
-        return jsonify({"error": f"Error in fetching delivery status: {str(e)}"}), 500
+        return jsonify(result), 200
+    
     except Exception as e:
-        # General error handler
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
