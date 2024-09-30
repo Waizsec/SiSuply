@@ -27,8 +27,11 @@ def get_suppliers():
             "id": "SUP03",
             "nama_sup": "Supplier 03",
             "kota": "Surakarta",
-            "tipe": "Sparepart"
+            "tipe": "Sparepart",
+            "pemilik": "Kelompok 03",
+            "deskripsi": "Toko Sparepart 03 kami, yang telah berdiri sejak tahun 2024, berkomitmen untuk menyediakan sparepart sepeda berkualitas tinggi bagi para pecinta sepeda. Kami menawarkan berbagai macam komponen sepeda, mulai dari rem yang presisi, rantai tahan lama, grip yang nyaman, pedal yang kokoh, saddle ergonomis, hingga bar tape dengan daya cengkeram yang optimal. Setiap produk yang kami jual dipilih dengan cermat untuk memastikan performa terbaik, kenyamanan, dan keamanan bersepeda. Dengan pengalaman dan dedikasi dalam industri, kami selalu berusaha memberikan pelayanan terbaik kepada pelanggan kami."
         }
+        
         return jsonify(suppliers), 200  # Mengembalikan semua produk dalam format JSON
     except Exception as e:
         return jsonify("FALSE"), 400
