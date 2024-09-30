@@ -336,12 +336,32 @@ def get_transaksi():
             if not invoice_list:
                 continue
             
+            # Ambil data dari tbl_checkout, pastikan id_log diperlakukan sebagai referensi
+            checkout_data = db.collection('tbl_checkout').where('id_log', '==', db.document(f'tbl_transaksi/{id_log}')).stream()
+            checkout_list = [doc.to_dict() for doc in checkout_data]
+            
             # Data yang akan kita simpan untuk transaksi ini
             transaksi_result = {
                 "id_log": id_log,
                 "produk": [],
-                "subtotal": transaksi.get('total_harga_barang', 0)
+                "subtotal": transaksi.get('total_harga_barang', 0),
+                "tanggal_pembelian": "",
+                "no_resi": ""
             }
+            
+            unique_resi = set()
+            for checkout in checkout_list:
+                no_resi = checkout.get('no_resi')
+                tanggal_pembelian = checkout.get('tanggal_pembelian')
+
+                # Cek jika no_resi belum ada di set
+                if no_resi not in unique_resi:
+                    # Jika belum ada, tambahkan ke set
+                    unique_resi.add(no_resi)
+                    
+                    # Tambahkan data ke transaksi_result
+                    transaksi_result['tanggal_pembelian'] = tanggal_pembelian
+                    transaksi_result['no_resi'] = no_resi
             
             # Iterasi setiap invoice dan ambil data produk dari tbl_produk
             for invoice in invoice_list:
