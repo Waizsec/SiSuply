@@ -327,6 +327,8 @@ def get_transaksi():
         # Iterasi setiap transaksi berdasarkan id_log
         for transaksi in transaksi_list:
             id_log = transaksi.get('id_log')
+            id_distributor = transaksi.get('id_distributor', 'Unknown')  # Ambil id_distributor
+            id_retail = transaksi.get('id_retail', 'Unknown')  # Ambil id_retail
             
             # Ambil seluruh data dari tbl_invoice berdasarkan id_log
             invoice_data = db.collection('tbl_invoice').where('id_log', '==', id_log).stream()
@@ -343,6 +345,8 @@ def get_transaksi():
             # Data yang akan kita simpan untuk transaksi ini
             transaksi_result = {
                 "id_log": id_log,
+                "id_distributor": id_distributor,  # Tambahkan id_distributor
+                "id_retail": id_retail,  # Tambahkan id_retail
                 "produk": [],
                 "subtotal": transaksi.get('total_harga_barang', 0),
                 "tanggal_pembelian": "",
