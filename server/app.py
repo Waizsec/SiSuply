@@ -44,7 +44,7 @@ def cek_harga():
         indexing = sum(1 for _ in data_transaksi) + 1  # Hitung berapa kali cek harga dilakukan sebelumnya
 
         # Generate id_log dengan format "SUP01RET03DIS01"
-        id_log = f"SUP03RET03DIS01-{indexing:0d}"  # 000 di bagian akhir menandakan cek harga ke berapa
+        id_log = f"SUP03-{indexing:0d}"  # 000 di bagian akhir menandakan cek harga ke berapa
         # id_log tergantung dari RETAIL DAN DISTRIBUTOR BERAPA
         
         inputTransaksi = {
@@ -70,13 +70,30 @@ def cek_harga():
         # Cek ongkir dari distributor
         
         # Ini IP dari distributor ASFA -> bikin IF else
-        respOngkir = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
-            "id_log": id_log,  # Menggunakan id_log yang baru di-generate
-            "kota_asal": "Surakarta",
-            "kota_tujuan": data['kota_tujuan'],
-            "quantity": sum(item['quantity'] for item in data['cart']),  # Total quantity dari semua produk
-            "berat": data['total_berat_barang']
-        })
+        if inputTransaksi["id_distributor"] == "DIS03":
+            respOngkir = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
+                "id_log": id_log,  # Menggunakan id_log yang baru di-generate
+                "kota_asal": "Surakarta",
+                "kota_tujuan": data['kota_tujuan'],
+                "quantity": sum(item['quantity'] for item in data['cart']),  # Total quantity dari semua produk
+                "berat": data['total_berat_barang']
+            })
+        elif inputTransaksi["id_distributor"] == "DIS02":
+            respOngkir = requests.post(f"ISI URL DARI DIS02", json={
+                "id_log": id_log,  # Menggunakan id_log yang baru di-generate
+                "kota_asal": "Surakarta",
+                "kota_tujuan": data['kota_tujuan'],
+                "quantity": sum(item['quantity'] for item in data['cart']),  # Total quantity dari semua produk
+                "berat": data['total_berat_barang']
+            })
+        elif inputTransaksi["id_distributor"] == "DIS01":
+            respOngkir = requests.post(f"ISI URL DARI DIS01", json={
+                "id_log": id_log,  # Menggunakan id_log yang baru di-generate
+                "kota_asal": "Surakarta",
+                "kota_tujuan": data['kota_tujuan'],
+                "quantity": sum(item['quantity'] for item in data['cart']),  # Total quantity dari semua produk
+                "berat": data['total_berat_barang']
+            })
         
         dataOngkir = respOngkir.json()
 
@@ -108,16 +125,26 @@ def checkout():
     try:
         collTransaksi = db.collection('tbl_transaksi').document(data['id_log'])
         data_transaksi = collTransaksi.get()
-
+        transaction_data = data_transaksi.to_dict()
+        
         if not data_transaksi.exists:
             return jsonify({"error": "NOT FOUND"}), 404
 
-        transaction_data = data_transaksi.to_dict()
-
-        # Melakukan pemesanan ke distributor
-        checkOutResp = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/fix_kirim", json={
-            "id_log": data['id_log']
-        })
+        if transaction_data["id_distributor"] == "DIS03":
+            # Melakukan pemesanan ke distributor
+            checkOutResp = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/fix_kirim", json={
+                "id_log": data['id_log']
+            })
+        elif transaction_data["id_distributor"] == "DIS02":
+            # Melakukan pemesanan ke distributor
+            checkOutResp = requests.post(f"ISI URL DIS 02", json={
+                "id_log": data['id_log']
+            })
+        elif transaction_data["id_distributor"] == "DIS01":
+            # Melakukan pemesanan ke distributor
+            checkOutResp = requests.post(f"ISI URL DIS 01", json={
+                "id_log": data['id_log']
+            })
         data_checkout = checkOutResp.json()
 
         # Membuat objek Pembelian baru
@@ -156,28 +183,33 @@ def checkout():
 # Create
 @app.route('/api/products', methods=['POST'])
 def add_product():
-    collProduct = db.collection('tbl_produk')
-    data_product = collProduct.stream()
-    indexing = sum(1 for _ in data_product) + 1
-    id_log = f"{indexing:0d}"
     try:
+        # Ambil semua data dari koleksi produk
+        collProduct = db.collection('tbl_produk')
+        data_product = collProduct.stream()
+        
+        # Hitung jumlah produk untuk menentukan ID berikutnya
+        indexing = sum(1 for _ in data_product) + 1
+        id_log = f"{indexing:0d}"  # Mengatur format id_log dengan leading zero (misal 0001, 0002, dst.)
+        
         # Nilai default yang ditetapkan untuk produk baru
         product_data = {
-            "berat" : float(request.form.get('berat', 0)),
-            "deskripsi" : request.form.get('deskripsi', '-'),
-            "harga" : int(request.form.get('harga', 0)),
-            "jml_stok" : int(request.form.get('jml_stok', 0)),
-            "nama_produk" : request.form.get('nama_produk', '-'),
-            "id_produk" : id_log
-            }
+            "berat": float(request.form.get('berat', 0)),
+            "deskripsi": request.form.get('deskripsi', '-'),
+            "harga": int(request.form.get('harga', 0)),
+            "jml_stok": int(request.form.get('jml_stok', 0)),
+            "nama_produk": request.form.get('nama_produk', '-'),
+            "link_gambar": request.form.get('link_gambar', '-'),
+            "id_produk": id_log  # Gunakan id_log sebagai id_produk
+        }
         
-        new_doc_ref = db.collection('tbl_produk').document()
-        product_data['id_produk'] = new_doc_ref.id  
+        # Simpan data produk baru dengan id_produk yang sudah dihitung
+        new_doc_ref = collProduct.document(id_log)
         new_doc_ref.set(product_data)
         
-        return jsonify("TRUE"), 201
+        return jsonify({"success": True, "id_produk": id_log}), 201
     except Exception as e:
-        return jsonify("FALSE"), 400
+        return jsonify({"success": False, "error": str(e)}), 400
     
 # Read
 @app.route('/api/products', methods=['GET'])
@@ -201,27 +233,34 @@ def get_products():
 @app.route('/api/products/<product_id>', methods=['PUT'])
 def update_product(product_id):
     try:
-        # Mengambil data produk yang diperbarui dari request JSON
-        product_data = {
-            "berat" : float(request.form.get('berat', 0)),
-            "deskripsi" : request.form.get('deskripsi', '-'),
-            "harga" : int(request.form.get('harga', 0)),
-            "jml_stok" : int(request.form.get('jml_stok', 0)),
-            "nama_produk" : request.form.get('nama_produk', '-'),
-            }
-        if not product_data:
-            return jsonify("NO DATA"), 400
-        
-        # Membuat referensi ke dokumen spesifik berdasarkan product_id
+        # Referensi ke dokumen produk berdasarkan product_id
         collProduk = db.collection('tbl_produk').document(product_id)
-        
-        if collProduk.get().exists:
-            collProduk.update(product_data)  # Memperbarui dokumen dengan data baru
-            return jsonify("TRUE"), 200
-        else:
+        doc = collProduk.get()
+
+        # Jika produk tidak ditemukan
+        if not doc.exists:
             return jsonify("NOT FOUND"), 404
+
+        # Mengambil data produk yang ada dari Firestore
+        current_data = doc.to_dict()
+
+        # Mengambil data dari request dengan fallback ke data yang ada jika nilainya kosong
+        product_data = {
+            "berat": float(request.form.get('berat', current_data.get('berat', 0))),
+            "deskripsi": request.form.get('deskripsi', current_data.get('deskripsi', '-')),
+            "harga": int(request.form.get('harga', current_data.get('harga', 0))),
+            "jml_stok": int(request.form.get('jml_stok', current_data.get('jml_stok', 0))),
+            "nama_produk": request.form.get('nama_produk', current_data.get('nama_produk', '-')),
+            "link_gambar": request.form.get('link_gambar', current_data.get('link_gambar', '-'))
+        }
+
+        # Memperbarui dokumen dengan data baru
+        collProduk.update(product_data)
+        return jsonify("TRUE"), 200
+
     except Exception as e:
-        return jsonify("FALSE"), 400
+        return jsonify({"error": str(e)}), 400
+
 
 # Delete
 @app.route('/api/products/<product_id>', methods=['DELETE'])
@@ -256,8 +295,28 @@ def update_stock():
         if not collInvoice or len(collInvoice) == 0:
             return jsonify({"error": "Transaksi not found"}), 404
 
-        # Cek status pengiriman menggunakan no_resi
-        respStatus = requests.get(f"http://159.223.41.243:8000/api/status/{resi}")
+        # Ambil data dari tbl_transaksi berdasarkan id_log
+        transaksi_doc = db.collection('tbl_transaksi').document(data['id_log']).get()
+
+        # Cek apakah dokumen transaksi ada
+        if not transaksi_doc.exists:
+            return jsonify({"error": "Transaksi tidak ditemukan pada tbl_transaksi"}), 404
+
+        # Ambil id_distributor dari dokumen transaksi
+        id_distributor = transaksi_doc.to_dict().get('id_distributor')
+
+        # Tentukan URL berdasarkan id_distributor
+        if id_distributor == "DIS03":
+            url = f"http://159.223.41.243:8000/api/status/{resi}"
+        elif id_distributor == "DIS02":
+            url = f"ISI URL DIS02{resi}"
+        elif id_distributor == "DIS01":
+            url = f"ISI URL DIS01{resi}"
+        else:
+            return jsonify({"error": "Distributor not recognized"}), 400
+
+        # Cek status pengiriman menggunakan URL yang sesuai
+        respStatus = requests.get(url)
         
         # Cek jika request berhasil
         if respStatus.status_code != 200:
@@ -287,7 +346,9 @@ def update_stock():
                         return jsonify({"error": f"Stok untuk produk {id_produk} tidak mencukupi"}), 400
 
                     # Update stok
-                    collProduk.update({"jml_stok": new_stock})
+                    collProduk.update({
+                        "jml_stok": new_stock
+                    })
 
                     # Tambahkan ke daftar produk yang stoknya dikurangi
                     stocks_deducted.append({
