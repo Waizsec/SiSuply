@@ -247,14 +247,16 @@ def update_product(product_id):
         # Mengambil data produk yang ada dari Firestore
         current_data = doc.to_dict()
 
-        # Mengambil data dari request dengan fallback ke data yang ada jika nilainya kosong
+        # Mengambil data PUT dari request JSON
+        data = request.json
+        
         product_data = {
-            "berat": float(request.form.get('berat', current_data.get('berat', 0))),
-            "deskripsi": request.form.get('deskripsi', current_data.get('deskripsi', '-')),
-            "harga": int(request.form.get('harga', current_data.get('harga', 0))),
-            "jml_stok": int(request.form.get('jml_stok', current_data.get('jml_stok', 0))),
-            "nama_produk": request.form.get('nama_produk', current_data.get('nama_produk', '-')),
-            "link_gambar": request.form.get('link_gambar', current_data.get('link_gambar', '-'))
+            "berat": float(data.get('berat', current_data.get('berat', 0))),
+            "deskripsi": data.get('deskripsi', current_data.get('deskripsi', '-')),
+            "harga": int(data.get('harga', current_data.get('harga', 0))),
+            "jml_stok": int(data.get('jml_stok', current_data.get('jml_stok', 0))),
+            "nama_produk": data.get('nama_produk', current_data.get('nama_produk', '-')),
+            "link_gambar": data.get('link_gambar', current_data.get('link_gambar', '-'))
         }
 
         # Memperbarui dokumen dengan data baru
