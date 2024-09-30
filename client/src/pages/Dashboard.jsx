@@ -30,7 +30,6 @@ const Dashboard = () => {
         }
     }, [LeftDisplay]);
 
-    console.log(SelectedProducts)
 
     return (
 
