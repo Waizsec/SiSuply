@@ -74,7 +74,7 @@ def cek_harga():
         
         # Ini IP dari distributor ASFA -> bikin IF else
         if inputTransaksi["id_distributor"] == "DIS03":
-            respOngkir = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
+            respOngkir = requests.post("http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
                 "id_log": id_log,  # Menggunakan id_log yang baru di-generate
                 "kota_asal": "Surakarta",
                 "kota_tujuan": data['kota_tujuan'],
@@ -82,7 +82,7 @@ def cek_harga():
                 "berat": data['total_berat_barang']
             })
         elif inputTransaksi["id_distributor"] == "DIS02":
-            respOngkir = requests.post(f"ISI URL DARI DIS02", json={
+            respOngkir = requests.post("http://143.244.170.95:8000/api/distributor5/orders/cek_ongkir", json={
                 "id_log": id_log,  # Menggunakan id_log yang baru di-generate
                 "kota_asal": "Surakarta",
                 "kota_tujuan": data['kota_tujuan'],
@@ -90,7 +90,7 @@ def cek_harga():
                 "berat": data['total_berat_barang']
             })
         elif inputTransaksi["id_distributor"] == "DIS01":
-            respOngkir = requests.post(f"ISI URL DARI DIS01", json={
+            respOngkir = requests.post("http://159.223.41.243:8000/api/distributors6/orders/cek_ongkir", json={
                 "id_log": id_log,  # Menggunakan id_log yang baru di-generate
                 "kota_asal": "Surakarta",
                 "kota_tujuan": data['kota_tujuan'],
@@ -140,12 +140,12 @@ def checkout():
             })
         elif transaction_data["id_distributor"] == "DIS02":
             # Melakukan pemesanan ke distributor
-            checkOutResp = requests.post(f"ISI URL DIS 02", json={
+            checkOutResp = requests.post(f"http://143.244.170.95:8000/api/distributor5/orders/fix_kirim", json={
                 "id_log": data['id_log']
             })
         elif transaction_data["id_distributor"] == "DIS01":
             # Melakukan pemesanan ke distributor
-            checkOutResp = requests.post(f"ISI URL DIS 01", json={
+            checkOutResp = requests.post(f"http://159.223.41.243:8000/api/distributors6/orders/fix_kirim", json={
                 "id_log": data['id_log']
             })
         data_checkout = checkOutResp.json()
@@ -166,7 +166,7 @@ def checkout():
             dataProduk = collProduk.get()
 
             if dataProduk.exists:
-                stock_sekarang = dataProduk.to_dict().get('jml_stok', 0)
+                stock_sekarang = dataProduk.to_dict().get('stock', 0)
                 new_stock = stock_sekarang - quantity
 
                 if new_stock < 0:
@@ -174,7 +174,7 @@ def checkout():
 
                 # Update stok
                 collProduk.update({
-                    "jml_stok": new_stock
+                    "stock": new_stock
                 })
                 
                 stocks_deducted.append({
@@ -234,7 +234,7 @@ def add_product():
             "berat": float(request.form.get('berat', 0)),
             "deskripsi": request.form.get('deskripsi', '-'),
             "harga": int(request.form.get('harga', 0)),
-            "jml_stok": int(request.form.get('jml_stok', 0)),
+            "stock": int(request.form.get('stock', 0)),
             "nama_produk": request.form.get('nama_produk', '-'),
             "link_gambar": request.form.get('link_gambar', '-'),
             "id_produk": id_log  # Gunakan id_log sebagai id_produk
@@ -286,7 +286,7 @@ def update_product(product_id):
             "berat": float(request.form.get('berat', current_data.get('berat', 0))),
             "deskripsi": request.form.get('deskripsi', current_data.get('deskripsi', '-')),
             "harga": int(request.form.get('harga', current_data.get('harga', 0))),
-            "jml_stok": int(request.form.get('jml_stok', current_data.get('jml_stok', 0))),
+            "stock": int(request.form.get('stock', current_data.get('stock', 0))),
             "nama_produk": request.form.get('nama_produk', current_data.get('nama_produk', '-')),
             "link_gambar": request.form.get('link_gambar', current_data.get('link_gambar', '-'))
         }
