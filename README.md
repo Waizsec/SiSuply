@@ -37,7 +37,7 @@ _Below is an example of how you can instruct your audience on installing and set
   ```sh
   npm install 
   ```
-4. Insall python libraries
+4. Install python libraries
   ```sh
   pip install flask firebase_admin 
   ```
@@ -50,13 +50,13 @@ _Below is an example of how you can instruct your audience on installing and set
 
 Proyek ini adalah aplikasi API berbasis Flask yang menyediakan fitur untuk mengelola produk, memproses cek harga dari distributor, melakukan pemesanan, dan memperbarui stok berdasarkan status pengiriman. API ini terhubung dengan Firebase Firestore untuk menyimpan data transaksi dan produk.
 
-## Fitur
+## Fitur API
 
 ### 1. Menampilkan Daftar Supplier (GET /api/suppliers)
 Mengambil data supplier dari server, termasuk informasi nama supplier, kota, tipe, pemilik, dan deskripsi supplier.
 #### Contoh Input :
 ```sh
-  npm install
+  http://127.0.0.1:5000/api/suppliers
 ```
 #### Contoh Output :
 ```sh
@@ -75,25 +75,123 @@ Mengambil data supplier dari server, termasuk informasi nama supplier, kota, tip
   - Detail keranjang belanja
 - Mengirim permintaan cek harga ke distributor tertentu berdasarkan ID distributor yang dikirimkan.
 - Menyimpan transaksi ke Firestore dengan `id_log` yang di-generate berdasarkan urutan transaksi sebelumnya.
+#### Contoh Input :
+```ssh
+{   "id_retail": "RET01",  
+    "id_distributor": "DIS03",  
+    "kota_tujuan": "Jakarta",  
+    "total_berat_barang": 1200,  
+    "total_harga_barang": 500000,  
+    "cart": [  
+        {  
+            "id_produk": "P03-1",  
+            "quantity": 10  
+        },  
+        {  
+            "id_produk": "P03-5",  
+            "quantity": 5  
+        }  ]  }
+```
+### Contoh Output :
+```ssh
+{
+    "harga_pengiriman": 960000,
+    "lama_pengiriman": "6 hari",
+    "pesan": "Cek harga berhasil",
+    "id_log": "SUP03-3"
+}
+```
 
 ### 3. Checkout/Pemesanan Produk (POST /api/checkout)
 - Memproses pemesanan dengan mengirimkan `id_log` ke distributor yang sesuai.
 - Menyimpan hasil checkout ke Firestore dengan nomor resi dan informasi pengiriman.
+#### Contoh Input :
+```ssh
+{"id_log": "SUP03-6"}
+```
+#### Contoh Output :
+```ssh
+{
+    "harga_pengiriman": 159,
+    "lama_pengiriman": "10 hari",
+    "message": "Pemesanan berhasil dilakukan",
+    "no_resi": "1PK9ADFR3C",
+    "purchase
+```
+
+## Fitur CRUD
 
 ### 4. Menambah Produk (POST /api/products)
 - Menambah produk baru ke dalam koleksi `tbl_produk` di Firestore dengan ID produk yang otomatis di-generate berdasarkan jumlah produk yang ada.
+#### Contoh Input :
+Melalui pengisian form yang tersedia
+
+#### Contoh Output :
+```ssh
+{"id_produk": "33",
+    "success": true}
+```
+
 
 ### 5. Mengambil Daftar Produk (GET /api/products)
 - Mengambil semua produk dari Firestore dan mengembalikannya dalam format JSON.
+#### Contoh Input :
+```ssh
+http://127.0.0.1:5000/api/products
+```
+
+#### Contoh Output :
+```ssh
+[    {        "berat": 0.309,
+        "deskripsi": "United Rantai 9 Speed RT-271 adalah rantai sepeda yang terbuat dari baja (steel berkualitas tinggi, yang dirancang khusus untuk sepeda dengan sistem transmisi 9 percepatan (9 speed). Dengan panjang link 116L, rantai ini kompatibel untuk digunakan pada sepeda dengan jumlah sprocket hingga 9 speed, sehingga dapat memberikan perpindahan gigi yang halus dan responsif. Kekuatan material baja yang digunakan membuat rantai ini tahan lama dan mampu menghadapi berbagai kondisi bersepeda.",
+        "harga": 150000,
+        "id": 1,
+        "id_produk": "1",
+        "jml_stok": 20,
+        "link_gambar": "https://icubic-space.sgp1.digitaloceanspaces.com/app/public/ss/lib/pro/img/2024/08/united-rantai-9-speed-rt-271-1-1724837137.jpg",
+        "nama_produk": "United Rantai 9 Speed RT-271"},...]
+```
 
 ### 6. Memperbarui Produk (PUT /api/products/<product_id>)
 - Memperbarui data produk berdasarkan ID produk yang diberikan. Pengguna dapat memperbarui atribut seperti berat, deskripsi, harga, stok, nama produk, dan link gambar.
+#### Contoh Input :
+```ssh
+http://127.0.0.1:5000/api/products/<product_id>
+{ "berat": "0.55"}
+```
+#### Contoh Output :
+```ssh
+"TRUE"
+```
 
 ### 7. Menghapus Produk (DELETE /api/products/<product_id>)
 - Menghapus produk dari Firestore berdasarkan ID produk.
+#### Contoh Input :
+```ssh
+http://127.0.0.1:5000/api/products/31
+```
 
-### 8. Memperbarui Stok Berdasarkan Status Pengiriman (POST /api/update_stock)
-- Memeriksa status pengiriman barang dari distributor berdasarkan nomor resi. Jika pengiriman sudah selesai, stok produk yang terjual akan dikurangi secara otomatis di Firestore.
+#### Contoh Output :
+```ssh
+"TRUE"
+```
+
+### 8. Memperbarui informasi produk yang sudah ada berdasarkan Status Pengiriman (GET /api/get_transaksi)
+- Memeriksa status pengiriman barang dari distributor berdasarkan nomor resi. Jika pengiriman sudah selesai, stok produk yang terjual akan dikurangi secara otomatis di Firestore. 
+
+#### Contoh Output :
+```ssh
+[    {        "id_log": "SUP03-1",
+        "no_resi": "54Q8N41TE2",
+        "produk": [            {
+                "harga": 150000,
+                "id_produk": "P03-1",
+                "nama_produk": "United Rantai 9 Speed RT-271",
+                "quantity": 2,
+                "total": 300000}        ],
+        "subtotal": 300000,
+        "tanggal_pembelian": "Mon, 30 Sep 2024 17:57:06 GMT"}
+```
 
 ## Struktur Proyek
 - **app.py**: File utama yang berisi semua endpoint API, koneksi Firebase Firestore, serta logika untuk mengelola produk dan transaksi.
