@@ -7,7 +7,7 @@ const ListProducts = ({ setLeftDisplay, setSelectedProduct }) => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/products');
+                const response = await fetch('https://supplier3.pythonanywhere.com/api/products');
                 const data = await response.json();
                 setProducts(data); // Set the fetched data to the products state
             } catch (error) {
@@ -69,7 +69,7 @@ const ListProducts = ({ setLeftDisplay, setSelectedProduct }) => {
                                         {truncateString(product.nama_produk, 30)} {/* Display truncated product name */}
                                     </h4>
                                     <p className=''>
-                                        Stock: {product.jml_stok} {/* Display stock */}
+                                        Stock: {product.stock} {/* Display stock */}
                                     </p>
                                 </div>
                                 <div className="h-full flex justify-center items-center">

@@ -8,7 +8,7 @@ const ListOrders = ({ setLeftDisplay, setSelectedTrx }) => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/get_transaksi');
+                const response = await fetch('https://supplier3.pythonanywhere.com/api/get_transaksi');
                 if (response.ok) {
                     const data = await response.json();
                     setOrders(data); // Update state with fetched data

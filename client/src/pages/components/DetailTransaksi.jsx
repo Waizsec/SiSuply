@@ -16,9 +16,9 @@ const DetailTransaksi = ({ orders }) => {
         const fetchShipmentStatus = async () => {
             if (!orders) return; // Check if orders is not null or undefined
 
-            if (orders.id_dist === 'DIS03') {
+            if (orders.id_distributor === 'DIS03') {
                 try {
-                    const response = await fetch(`http://159.223.41.243:8000//api/distributors6/orders/${orders.no_resi}`);
+                    const response = await fetch(`http://159.223.41.243:8000/api/status/${orders.no_resi}`);
                     if (response.ok) {
                         const data = await response.json();
                         setShipmentStatus(data.status || 'Unknown'); // Assuming the response contains a status field
@@ -37,8 +37,6 @@ const DetailTransaksi = ({ orders }) => {
 
         fetchShipmentStatus();
     }, [orders]); // Re-run the effect if orders changes
-
-    console.log(shipmentStatus)
 
     return (
         <>
@@ -87,7 +85,7 @@ const DetailTransaksi = ({ orders }) => {
 
                     <div className="flex justify-between text-[1vw] mt-[1vw]">
                         <p>Status: </p>
-                        <p>{shipmentStatus.status || 'Unknown'}</p> {/* Display fetched status */}
+                        <p>{shipmentStatus || 'Unknown'}</p> {/* Display fetched status */}
                     </div>
                 </div>
             ) : (
