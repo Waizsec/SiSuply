@@ -114,7 +114,7 @@ def cek_harga():
 
         return jsonify({
             "pesan": "Cek harga berhasil",
-            "transaction_id": id_log,  # Menggunakan id_log yang baru di-generate
+            "id_log": id_log,  # Menggunakan id_log yang baru di-generate
             "harga_pengiriman": dataOngkir['harga_pengiriman'],
             "lama_pengiriman": dataOngkir.get('lama_pengiriman')
         }), 200
