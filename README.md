@@ -54,6 +54,19 @@ Proyek ini adalah aplikasi API berbasis Flask yang menyediakan fitur untuk menge
 
 ### 1. Menampilkan Daftar Supplier (GET /api/suppliers)
 Mengambil data supplier dari server, termasuk informasi nama supplier, kota, tipe, pemilik, dan deskripsi supplier.
+#### Contoh Input :
+```sh
+  npm install
+```
+#### Contoh Output :
+```sh
+{    "deskripsi": "Toko Sparepart 03 kami, yang telah berdiri sejak tahun 2024, berkomitmen untuk menyediakan sparepart sepeda berkualitas tinggi bagi para pecinta sepeda. Kami menawarkan berbagai macam komponen sepeda, mulai dari rem yang presisi, rantai tahan lama, grip yang nyaman, pedal yang kokoh, saddle ergonomis, hingga bar tape dengan daya cengkeram yang optimal. Setiap produk yang kami jual dipilih dengan cermat untuk memastikan performa terbaik, kenyamanan, dan keamanan bersepeda. Dengan pengalaman dan dedikasi dalam industri, kami selalu berusaha memberikan pelayanan terbaik kepada pelanggan kami.",
+    "id": "SUP03",
+    "kota": "Surakarta",
+    "nama_sup": "Supplier 03",
+    "pemilik": "Kelompok 03",
+    "tipe": "Sparepart"}
+```
 
 ### 2. Cek Harga dari Distributor (POST /api/cek_harga)
 - Menerima data dalam format JSON yang berisi informasi tentang:
