@@ -1,22 +1,27 @@
 # SiSuply
 ## Anggota | Kelompok 3
-- 162112133009 | Diaz Arvinda Ardian
-- 162112133028 | Denis Muhammad Jethro
-- 164221010 | Aqila Hana Winanggoro
-- 164221016 | Jihan Ashifa Hakim
-- 164221079 | Patricia Dewinta Wahyu Krisnayanti
+- Raden Bagus Rifa’i Kacanegara    | 162112133047
+- Moreno Achmad Musadat            | 162112133080
+- Davano Al Raffi Abdul Jabbar     | 162112133083
+- I Ketut Andika Wisnu Danuarta    | 162112133115
+- Alun Yuanita Indraswari          | 164221001
+- Zoen Yokhanan Sianipar           | 164221038
+
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Berikut ini contoh bagaimana  instruksi untuk menyiapkan proyek ini secara lokal.
+Untuk menyiapkan dan menjalankannya, ikuti contoh langkah sederhana berikut ini.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
 * npm
   ```sh
-  npm install npm@latest -g
+  npm install 
+  ```
+* pip
+  ```sh
+  pip install flask firebase_admin 
   ```
 
 ### Installation
@@ -28,18 +33,17 @@ _Below is an example of how you can instruct your audience on installing and set
    ```sh
    git clone https://github.com/github_username/repo_name.git
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
+3. Install npm
+  ```sh
+  npm install 
+  ```
+4. Insall python libraries
+  ```sh
+  pip install flask firebase_admin 
+  ```
+5. Enter your Firebase API in `cfg/firebaseconfig.json`
+   ```json
+   'YOUR_API_KEY'
    ```
 
 # API untuk Manajemen Produk dan Cek Harga Pengiriman
